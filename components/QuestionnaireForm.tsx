@@ -33,10 +33,26 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
         return;
       }
       
-      // 파일 형식 검증
-      const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
-      if (!allowedTypes.includes(file.type)) {
-        setError('PDF 또는 이미지 파일만 업로드 가능합니다.');
+      // 디버깅을 위한 로그
+      console.log('업로드된 파일:', file.name, '타입:', file.type);
+      
+      // 파일 형식 검증 (확장자도 함께 확인)
+      const allowedTypes = [
+        'application/pdf', 
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
+        'image/png', 
+        'image/jpeg', 
+        'image/jpg',
+        'image/gif'
+      ];
+      
+      const fileName = file.name.toLowerCase();
+      const isDocx = fileName.endsWith('.docx');
+      const isPdf = fileName.endsWith('.pdf');
+      const isImage = fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.gif');
+      
+      if (!allowedTypes.includes(file.type) && !(isDocx || isPdf || isImage)) {
+        setError(`지원하지 않는 파일 형식입니다. 파일 타입: ${file.type}, 파일명: ${file.name}`);
         return;
       }
       
@@ -160,11 +176,11 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
           <input
             type="file"
             onChange={handleFileChange}
-            accept=".pdf,.png,.jpg,.jpeg"
+            accept=".pdf,.docx,.png,.jpg,.jpeg,.gif"
             className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
           />
           <p className="text-sm text-gray-500 mt-1">
-            PDF 또는 이미지 파일 (최대 10MB)
+            문서 파일(DOCX, PDF) 또는 이미지 파일(JPG, PNG, GIF) (최대 10MB)
           </p>
           {resumeFile && (
             <p className="text-sm text-green-600 mt-1">
