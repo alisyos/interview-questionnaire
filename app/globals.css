@@ -8,14 +8,132 @@
     display: none !important;
   }
   
+  .print-only {
+    display: block !important;
+  }
+  
   body {
     background: white !important;
     color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
   .shadow-md,
   .shadow-sm {
     box-shadow: none !important;
+  }
+  
+  /* 인쇄 시 결과 영역 스타일 */
+  .questionnaire-result {
+    background: white !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: auto !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* 모든 div 컨테이너 높이 제한 해제 */
+  div {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  /* 페이지 설정 */
+  @page {
+    margin: 15mm !important;
+    size: A4 !important;
+  }
+  
+  /* 인쇄 시 전체 페이지 높이 제한 해제 */
+  html, body {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  /* 메인 컨테이너 높이 제한 해제 */
+  .bg-gray-50 {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  /* 페이지 브레이크 제어 */
+  .question-card {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-bottom: 15px !important;
+    padding: 10px !important;
+  }
+  
+  /* 섹션 제목 페이지 브레이크 */
+  .section-title {
+    page-break-before: avoid !important;
+    margin-top: 20px !important;
+    margin-bottom: 15px !important;
+  }
+  
+  .section-title:first-child {
+    margin-top: 0 !important;
+  }
+  
+  /* 인쇄 시 불필요한 요소 숨기기 */
+  button,
+  .no-print {
+    display: none !important;
+  }
+  
+  /* 메인 레이아웃 숨기고 결과만 표시 */
+  .grid.grid-cols-5 {
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  .col-span-2 {
+    display: none !important;
+  }
+  
+  .col-span-3 {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  /* 제목 스타일 */
+  h1, h2 {
+    color: black !important;
+    margin-bottom: 15px !important;
+    line-height: 1.2 !important;
+  }
+  
+  /* 경계선 스타일 */
+  .border {
+    border-color: #000 !important;
+  }
+  
+  /* 텍스트 스타일 */
+  p, li {
+    line-height: 1.4 !important;
+    margin-bottom: 8px !important;
+  }
+  
+  /* 전체 페이지 레이아웃 재설정 */
+  * {
+    box-sizing: border-box !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
 }
 

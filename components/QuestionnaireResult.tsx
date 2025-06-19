@@ -4,10 +4,9 @@ import { QuestionnaireOutput, Question, IndividualQuestion } from '@/types';
 
 interface QuestionnaireResultProps {
   data: QuestionnaireOutput;
-  onReset: () => void;
 }
 
-export default function QuestionnaireResult({ data, onReset }: QuestionnaireResultProps) {
+export default function QuestionnaireResult({ data }: QuestionnaireResultProps) {
   const handlePrint = () => {
     window.print();
   };
@@ -26,7 +25,7 @@ export default function QuestionnaireResult({ data, onReset }: QuestionnaireResu
   };
 
   return (
-    <div className="h-full p-6 bg-white">
+    <div className="h-full p-6 bg-white questionnaire-result">
       {/* 헤더 */}
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
         <h1 className="text-xl font-bold text-gray-800">면접 질문지</h1>
@@ -43,18 +42,12 @@ export default function QuestionnaireResult({ data, onReset }: QuestionnaireResu
           >
             다운로드
           </button>
-          <button
-            onClick={onReset}
-            className="px-3 py-1.5 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-          >
-            새로 작성
-          </button>
         </div>
       </div>
 
       {/* 공통 질문 섹션 */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-blue-500 pb-2">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-blue-500 pb-2 section-title">
           공통 질문 ({data.commonQuestions?.length || 0}개)
         </h2>
         <div className="space-y-6">
@@ -66,7 +59,7 @@ export default function QuestionnaireResult({ data, onReset }: QuestionnaireResu
 
       {/* 개별 질문 섹션 */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-green-500 pb-2">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-green-500 pb-2 section-title">
           개별 질문 ({data.individualQuestions?.length || 0}개)
         </h2>
         <div className="space-y-6">
@@ -84,7 +77,7 @@ export default function QuestionnaireResult({ data, onReset }: QuestionnaireResu
 
 function QuestionCard({ question, index }: { question: Question; index: number }) {
   return (
-    <div className="p-4 border border-gray-200 rounded-lg">
+    <div className="p-4 border border-gray-200 rounded-lg question-card">
       <h3 className="font-semibold text-lg text-gray-800 mb-2">
         Q{index}. {question.question}
       </h3>
@@ -104,7 +97,7 @@ function QuestionCard({ question, index }: { question: Question; index: number }
 
 function IndividualQuestionCard({ question, index }: { question: IndividualQuestion; index: number }) {
   return (
-    <div className="p-4 border border-gray-200 rounded-lg">
+    <div className="p-4 border border-gray-200 rounded-lg question-card">
       <h3 className="font-semibold text-lg text-gray-800 mb-2">
         Q{index}. {question.question}
       </h3>

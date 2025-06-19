@@ -12,10 +12,6 @@ export default function HomePage() {
     setResult(data);
   };
 
-  const handleReset = () => {
-    setResult(null);
-  };
-
   return (
     <div className="bg-gray-50" style={{ height: 'calc(100vh - 64px)' }}>
       <div className="h-full grid grid-cols-5">
@@ -27,7 +23,7 @@ export default function HomePage() {
           {/* 우측 결과 영역 (3/5) */}
           <div className="col-span-3 overflow-y-auto">
             {result ? (
-              <QuestionnaireResult data={result} onReset={handleReset} />
+              <QuestionnaireResult data={result} />
             ) : (
               <div className="h-full flex items-center justify-center bg-gray-50">
                 <div className="text-center text-gray-500">
