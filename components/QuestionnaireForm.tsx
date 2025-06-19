@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { QuestionnaireInput, QuestionnaireOutput, POSITIONS, EXPERIENCES, COMPANY_TYPES } from '@/types';
+import LoadingModal from './LoadingModal';
 
 interface QuestionnaireFormProps {
   onSubmit: (data: QuestionnaireOutput) => void;
@@ -208,6 +209,9 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
       
       {/* 하단 여백 */}
       <div className="pb-8"></div>
+      
+      {/* 로딩 모달 */}
+      <LoadingModal isOpen={isLoading} />
     </div>
   );
 } 
