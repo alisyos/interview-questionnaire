@@ -80,8 +80,10 @@ export async function POST(request: NextRequest) {
     }
 
     // gpt-4.1 모델로 처리
+    console.log('Sending request to OpenAI with messages count:', messages.length);
+    
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1',
+      model: 'gpt-4.1', // ⚠️ 절대 바꾸지 말 것! 사용자 요청 모델
       messages: messages,
       temperature: 0.7,
       max_tokens: 4000,
