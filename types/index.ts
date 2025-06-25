@@ -2,6 +2,8 @@ export interface QuestionnaireInput {
   position: string;
   experience: string;
   companyType: string;
+  mainTasks: string;
+  organizationalFocus: string;
   resume?: string;
 }
 

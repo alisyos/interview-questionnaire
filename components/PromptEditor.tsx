@@ -4,11 +4,17 @@ import { useState, useEffect } from 'react';
 import { POSITIONS, EXPERIENCES, COMPANY_TYPES } from '@/types';
 
 interface PromptData {
-  basePrompt: string;
+  basePrompts: {
+    withoutResume: string;
+    withResume: string;
+  };
   positionPrompts: { [key: string]: string };
   experiencePrompts: { [key: string]: string };
   companyTypePrompts: { [key: string]: string };
-  outputFormat: string;
+  outputFormats: {
+    withoutResume: string;
+    withResume: string;
+  };
 }
 
 export default function PromptEditor() {
@@ -76,10 +82,21 @@ export default function PromptEditor() {
     setPrompts(prev => {
       if (!prev) return prev;
       
-      if (type === 'base' || type === 'output') {
+      if (type === 'base') {
         return {
           ...prev,
-          [type === 'base' ? 'basePrompt' : 'outputFormat']: value
+          basePrompts: {
+            ...prev.basePrompts,
+            [key]: value
+          }
+        };
+      } else if (type === 'output') {
+        return {
+          ...prev,
+          outputFormats: {
+            ...prev.outputFormats,
+            [key]: value
+          }
         };
       } else {
         const promptType = `${type}Prompts` as keyof PromptData;
@@ -165,14 +182,28 @@ export default function PromptEditor() {
       {/* 컨텐츠 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'base' && (
-          <div>
+          <div className="space-y-6">
             <h2 className="text-lg font-semibold mb-4">기본 시스템 프롬프트</h2>
-            <textarea
-              value={prompts.basePrompt}
-              onChange={(e) => updatePrompt('base', '', e.target.value)}
-              className="w-full h-96 p-4 border border-gray-300 rounded-md font-mono text-sm"
-              placeholder="기본 시스템 프롬프트를 입력하세요..."
-            />
+            
+            <div>
+              <h3 className="text-md font-medium mb-2">이력서 없는 경우 (공통 질문만)</h3>
+              <textarea
+                value={prompts.basePrompts.withoutResume}
+                onChange={(e) => updatePrompt('base', 'withoutResume', e.target.value)}
+                className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm"
+                placeholder="이력서가 없을 때 사용되는 기본 프롬프트를 입력하세요..."
+              />
+            </div>
+
+            <div>
+              <h3 className="text-md font-medium mb-2">이력서 있는 경우 (공통 + 개별 질문)</h3>
+              <textarea
+                value={prompts.basePrompts.withResume}
+                onChange={(e) => updatePrompt('base', 'withResume', e.target.value)}
+                className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm"
+                placeholder="이력서가 있을 때 사용되는 기본 프롬프트를 입력하세요..."
+              />
+            </div>
           </div>
         )}
 
@@ -228,14 +259,28 @@ export default function PromptEditor() {
         )}
 
         {activeTab === 'output' && (
-          <div>
+          <div className="space-y-6">
             <h2 className="text-lg font-semibold mb-4">출력 형식</h2>
-            <textarea
-              value={prompts.outputFormat}
-              onChange={(e) => updatePrompt('output', '', e.target.value)}
-              className="w-full h-96 p-4 border border-gray-300 rounded-md font-mono text-sm"
-              placeholder="출력 형식을 입력하세요..."
-            />
+            
+            <div>
+              <h3 className="text-md font-medium mb-2">이력서 없는 경우 출력 형식</h3>
+              <textarea
+                value={prompts.outputFormats.withoutResume}
+                onChange={(e) => updatePrompt('output', 'withoutResume', e.target.value)}
+                className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm"
+                placeholder="이력서가 없을 때 사용되는 출력 형식을 입력하세요..."
+              />
+            </div>
+
+            <div>
+              <h3 className="text-md font-medium mb-2">이력서 있는 경우 출력 형식</h3>
+              <textarea
+                value={prompts.outputFormats.withResume}
+                onChange={(e) => updatePrompt('output', 'withResume', e.target.value)}
+                className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm"
+                placeholder="이력서가 있을 때 사용되는 출력 형식을 입력하세요..."
+              />
+            </div>
           </div>
         )}
       </div>

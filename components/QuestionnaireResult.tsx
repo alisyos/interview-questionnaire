@@ -58,16 +58,18 @@ export default function QuestionnaireResult({ data }: QuestionnaireResultProps) 
       </div>
 
       {/* 개별 질문 섹션 */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-green-500 pb-2 section-title">
-          개별 질문 ({data.individualQuestions?.length || 0}개)
-        </h2>
-        <div className="space-y-6">
-          {data.individualQuestions?.map((question, index) => (
-            <IndividualQuestionCard key={index} question={question} index={index + 1} />
-          ))}
+      {data.individualQuestions && data.individualQuestions.length > 0 && (
+        <div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b-2 border-green-500 pb-2 section-title">
+            개별 질문 ({data.individualQuestions.length}개)
+          </h2>
+          <div className="space-y-6">
+            {data.individualQuestions.map((question, index) => (
+              <IndividualQuestionCard key={index} question={question} index={index + 1} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       
       {/* 하단 여백 */}
       <div className="pb-8"></div>
@@ -134,16 +136,19 @@ function generateTextContent(data: QuestionnaireOutput): string {
     content += `\n`;
   });
 
-  content += `=== 개별 질문 (${data.individualQuestions?.length || 0}개) ===\n\n`;
-  data.individualQuestions?.forEach((question, index) => {
-    content += `Q${index + 1}. ${question.question}\n`;
-    content += `이력서 근거: ${question.resumeSource || '-'}\n`;
-    content += `후속 질문:\n`;
-    question.followUps?.forEach((followUp, idx) => {
-      content += `  ${idx + 1}) ${followUp}\n`;
+  // 개별 질문이 있을 때만 개별 질문 섹션 추가
+  if (data.individualQuestions && data.individualQuestions.length > 0) {
+    content += `=== 개별 질문 (${data.individualQuestions.length}개) ===\n\n`;
+    data.individualQuestions.forEach((question, index) => {
+      content += `Q${index + 1}. ${question.question}\n`;
+      content += `이력서 근거: ${question.resumeSource || '-'}\n`;
+      content += `후속 질문:\n`;
+      question.followUps?.forEach((followUp, idx) => {
+        content += `  ${idx + 1}) ${followUp}\n`;
+      });
+      content += `\n`;
     });
-    content += `\n`;
-  });
+  }
 
   return content;
 } 

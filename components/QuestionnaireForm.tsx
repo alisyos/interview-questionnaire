@@ -13,6 +13,8 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
     position: '',
     experience: '',
     companyType: '',
+    mainTasks: '',
+    organizationalFocus: '',
   });
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,14 +71,16 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
 
     try {
       // 필수 필드 검증
-      if (!formData.position || !formData.experience || !formData.companyType) {
-        throw new Error('직무, 경력, 기업형태는 필수 입력 항목입니다.');
+      if (!formData.position || !formData.experience || !formData.companyType || !formData.mainTasks) {
+        throw new Error('직무, 경력, 기업형태, 주요 업무 내용은 필수 입력 항목입니다.');
       }
 
       const submitFormData = new FormData();
       submitFormData.append('position', formData.position);
       submitFormData.append('experience', formData.experience);
       submitFormData.append('companyType', formData.companyType);
+      submitFormData.append('mainTasks', formData.mainTasks);
+      submitFormData.append('organizationalFocus', formData.organizationalFocus);
       
       if (resumeFile) {
         submitFormData.append('resume', resumeFile);
@@ -167,6 +171,35 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
               </option>
             ))}
           </select>
+        </div>
+
+        {/* 주요 업무 내용 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            주요 업무 내용 <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            value={formData.mainTasks}
+            onChange={(e) => handleInputChange('mainTasks', e.target.value)}
+            placeholder="예: 신규 제품 기획, 웹상세페이지 개발 등"
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            rows={3}
+            required
+          />
+        </div>
+
+        {/* 조직 차원의 핵심 고려 요소 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            조직 차원의 핵심 고려 요소
+          </label>
+          <textarea
+            value={formData.organizationalFocus}
+            onChange={(e) => handleInputChange('organizationalFocus', e.target.value)}
+            placeholder="예: 커뮤니케이션 능력, 문제해결력, 인성 적합성 등"
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            rows={3}
+          />
         </div>
 
         {/* 이력서 업로드 */}

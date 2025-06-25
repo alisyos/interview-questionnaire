@@ -15,12 +15,14 @@ export async function POST(request: NextRequest) {
     const position = formData.get('position') as string;
     const experience = formData.get('experience') as string;
     const companyType = formData.get('companyType') as string;
+    const mainTasks = formData.get('mainTasks') as string;
+    const organizationalFocus = formData.get('organizationalFocus') as string;
     const resumeFile = formData.get('resume') as File | null;
 
     // 필수 필드 검증
-    if (!position || !experience || !companyType) {
+    if (!position || !experience || !companyType || !mainTasks) {
       return NextResponse.json(
-        { error: '직무, 경력, 기업형태는 필수 입력 항목입니다.' },
+        { error: '직무, 경력, 기업형태, 주요 업무 내용은 필수 입력 항목입니다.' },
         { status: 400 }
       );
     }
@@ -55,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 시스템 프롬프트 생성 (텍스트 추출된 이력서 포함)
-    const systemPrompt = buildSystemPrompt(position, experience, companyType, resumeText);
+    const systemPrompt = buildSystemPrompt(position, experience, companyType, mainTasks, organizationalFocus, resumeText);
 
     // 메시지 배열 구성
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
@@ -98,9 +100,24 @@ export async function POST(request: NextRequest) {
     // JSON 파싱 및 검증
     let questionnaire: QuestionnaireOutput;
     try {
-      questionnaire = JSON.parse(response);
+      // "json" 키워드로 시작하는 경우 제거
+      let cleanedResponse = response.trim();
+      
+      // "json" 키워드가 맨 앞에 있는 경우 제거
+      if (cleanedResponse.startsWith('json')) {
+        cleanedResponse = cleanedResponse.substring(4).trim();
+      }
+      
+      // 코드 블록 표시(```)가 있는 경우 제거
+      cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      
+      console.log('Cleaned response:', cleanedResponse.substring(0, 200) + '...');
+      
+      questionnaire = JSON.parse(cleanedResponse);
     } catch (error) {
       console.error('JSON parsing error:', error);
+      console.error('Raw response:', response.substring(0, 500) + '...');
       throw new Error('생성된 질문 형식이 올바르지 않습니다.');
     }
 
