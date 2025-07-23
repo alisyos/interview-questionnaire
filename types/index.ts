@@ -5,6 +5,7 @@ export interface QuestionnaireInput {
   mainTasks: string;
   organizationalFocus: string;
   resume?: string;
+  jobPosting?: string;
 }
 
 export interface Question {

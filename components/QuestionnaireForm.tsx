@@ -17,6 +17,7 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
     organizationalFocus: '',
   });
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [jobPostingFile, setJobPostingFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
@@ -27,7 +28,7 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fileType: 'resume' | 'jobPosting') => {
     const file = e.target.files?.[0];
     if (file) {
       // 파일 크기 검증 (10MB)
@@ -59,7 +60,11 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
         return;
       }
       
-      setResumeFile(file);
+      if (fileType === 'resume') {
+        setResumeFile(file);
+      } else {
+        setJobPostingFile(file);
+      }
       setError('');
     }
   };
@@ -70,10 +75,14 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
     setError('');
 
     try {
-      // 필수 필드 검증
-      if (!formData.position || !formData.experience || !formData.companyType || !formData.mainTasks) {
-        throw new Error('직무, 경력, 기업형태, 주요 업무 내용은 필수 입력 항목입니다.');
+      // 채용공고가 있는 경우와 없는 경우의 필수 필드 검증
+      if (!jobPostingFile) {
+        // 채용공고가 없는 경우 기존 필수 필드 검증
+        if (!formData.position || !formData.experience || !formData.companyType || !formData.mainTasks) {
+          throw new Error('채용공고가 없는 경우 직무, 경력, 기업형태, 주요 업무 내용은 필수 입력 항목입니다.');
+        }
       }
+      // 채용공고가 있는 경우 필수 필드 검증 생략
 
       const submitFormData = new FormData();
       submitFormData.append('position', formData.position);
@@ -84,6 +93,10 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
       
       if (resumeFile) {
         submitFormData.append('resume', resumeFile);
+      }
+
+      if (jobPostingFile) {
+        submitFormData.append('jobPosting', jobPostingFile);
       }
 
       const response = await fetch('/api/generate', {
@@ -113,16 +126,53 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
       </h1>
       
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* 채용공고 업로드 - 최상단 배치 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            채용공고 업로드
+          </label>
+          <input
+            type="file"
+            onChange={(e) => handleFileChange(e, 'jobPosting')}
+            accept=".pdf,.docx,.png,.jpg,.jpeg,.gif"
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          />
+          <p className="text-sm text-gray-500 mt-1">
+            문서 파일(DOCX, PDF) 또는 이미지 파일(JPG, PNG, GIF) (최대 10MB)
+          </p>
+          {jobPostingFile && (
+            <p className="text-sm text-green-600 mt-1">
+              선택된 파일: {jobPostingFile.name}
+            </p>
+          )}
+          
+          {/* 항상 표시되는 안내 문구 */}
+          <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-sm text-blue-700">
+              💡 채용공고를 업로드 하시면, 자동으로 직무, 경력, 기업 정보를 추출함으로, 필수 입력 항목 입력을 생략할 수 있습니다.
+            </p>
+          </div>
+          
+          {jobPostingFile && (
+            <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-sm text-green-700">
+                ✅ 채용공고가 업로드되었습니다. 아래 필수 입력 항목들이 선택사항으로 변경되었습니다.
+              </p>
+            </div>
+          )}
+        </div>
+
         {/* 직무 선택 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            직무 <span className="text-red-500">*</span>
+            직무 {!jobPostingFile && <span className="text-red-500">*</span>}
+            {jobPostingFile && <span className="text-green-600">(선택사항)</span>}
           </label>
           <select
             value={formData.position}
             onChange={(e) => handleInputChange('position', e.target.value)}
             className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            required
+            required={!jobPostingFile}
           >
             <option value="">직무를 선택해주세요</option>
             {POSITIONS.map(position => (
@@ -131,18 +181,24 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
               </option>
             ))}
           </select>
+          {jobPostingFile && (
+            <p className="text-sm text-gray-500 mt-1">
+              채용공고에서 직무 정보를 추출합니다. 필요시 수동으로 선택할 수 있습니다.
+            </p>
+          )}
         </div>
 
         {/* 경력 선택 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            경력 <span className="text-red-500">*</span>
+            경력 {!jobPostingFile && <span className="text-red-500">*</span>}
+            {jobPostingFile && <span className="text-green-600">(선택사항)</span>}
           </label>
           <select
             value={formData.experience}
             onChange={(e) => handleInputChange('experience', e.target.value)}
             className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            required
+            required={!jobPostingFile}
           >
             <option value="">경력을 선택해주세요</option>
             {EXPERIENCES.map(experience => (
@@ -151,18 +207,24 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
               </option>
             ))}
           </select>
+          {jobPostingFile && (
+            <p className="text-sm text-gray-500 mt-1">
+              채용공고에서 경력 정보를 추출합니다. 필요시 수동으로 선택할 수 있습니다.
+            </p>
+          )}
         </div>
 
         {/* 기업형태 선택 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            기업형태 <span className="text-red-500">*</span>
+            기업형태 {!jobPostingFile && <span className="text-red-500">*</span>}
+            {jobPostingFile && <span className="text-green-600">(선택사항)</span>}
           </label>
           <select
             value={formData.companyType}
             onChange={(e) => handleInputChange('companyType', e.target.value)}
             className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            required
+            required={!jobPostingFile}
           >
             <option value="">기업형태를 선택해주세요</option>
             {COMPANY_TYPES.map(type => (
@@ -171,21 +233,32 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
               </option>
             ))}
           </select>
+          {jobPostingFile && (
+            <p className="text-sm text-gray-500 mt-1">
+              채용공고에서 기업형태 정보를 추출합니다. 필요시 수동으로 선택할 수 있습니다.
+            </p>
+          )}
         </div>
 
         {/* 주요 업무 내용 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            주요 업무 내용 <span className="text-red-500">*</span>
+            주요 업무 내용 {!jobPostingFile && <span className="text-red-500">*</span>}
+            {jobPostingFile && <span className="text-green-600">(선택사항)</span>}
           </label>
           <textarea
             value={formData.mainTasks}
             onChange={(e) => handleInputChange('mainTasks', e.target.value)}
-            placeholder="예: 신규 제품 기획, 웹상세페이지 개발 등"
+            placeholder={jobPostingFile ? "채용공고에서 주요 업무를 추출합니다. 추가 정보가 있다면 입력해주세요." : "예: 신규 제품 기획, 웹상세페이지 개발 등"}
             className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             rows={3}
-            required
+            required={!jobPostingFile}
           />
+          {jobPostingFile && (
+            <p className="text-sm text-gray-500 mt-1">
+              채용공고에서 주요 업무 내용을 추출합니다. 추가 정보가 있다면 입력해주세요.
+            </p>
+          )}
         </div>
 
         {/* 조직 차원의 핵심 고려 요소 */}
@@ -209,7 +282,7 @@ export default function QuestionnaireForm({ onSubmit }: QuestionnaireFormProps) 
           </label>
           <input
             type="file"
-            onChange={handleFileChange}
+            onChange={(e) => handleFileChange(e, 'resume')}
             accept=".pdf,.docx,.png,.jpg,.jpeg,.gif"
             className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
           />

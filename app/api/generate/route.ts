@@ -18,13 +18,16 @@ export async function POST(request: NextRequest) {
     const mainTasks = formData.get('mainTasks') as string;
     const organizationalFocus = formData.get('organizationalFocus') as string;
     const resumeFile = formData.get('resume') as File | null;
+    const jobPostingFile = formData.get('jobPosting') as File | null;
 
-    // 필수 필드 검증
-    if (!position || !experience || !companyType || !mainTasks) {
-      return NextResponse.json(
-        { error: '직무, 경력, 기업형태, 주요 업무 내용은 필수 입력 항목입니다.' },
-        { status: 400 }
-      );
+    // 채용공고가 없는 경우에만 필수 필드 검증
+    if (!jobPostingFile || jobPostingFile.size === 0) {
+      if (!position || !experience || !companyType || !mainTasks) {
+        return NextResponse.json(
+          { error: '채용공고가 없는 경우 직무, 경력, 기업형태, 주요 업무 내용은 필수 입력 항목입니다.' },
+          { status: 400 }
+        );
+      }
     }
 
     // 이력서 파일 처리
@@ -47,17 +50,46 @@ export async function POST(request: NextRequest) {
         try {
           resumeText = await processResumeFile(resumeFile);
         } catch (error) {
-          console.error('File processing error:', error);
+          console.error('Resume file processing error:', error);
           return NextResponse.json(
-            { error: '파일 처리 중 오류가 발생했습니다.' },
+            { error: '이력서 파일 처리 중 오류가 발생했습니다.' },
             { status: 400 }
           );
         }
       }
     }
 
-    // 시스템 프롬프트 생성 (텍스트 추출된 이력서 포함)
-    const systemPrompt = buildSystemPrompt(position, experience, companyType, mainTasks, organizationalFocus, resumeText);
+    // 채용공고 파일 처리
+    let jobPostingContent = null;
+    let jobPostingText = '';
+    
+    if (jobPostingFile && jobPostingFile.size > 0) {
+      if (jobPostingFile.type.startsWith('image/')) {
+        // 이미지 파일인 경우 - gpt-4.1이 직접 처리
+        const fileBuffer = await jobPostingFile.arrayBuffer();
+        const base64File = Buffer.from(fileBuffer).toString('base64');
+        jobPostingContent = {
+          type: 'image_url' as const,
+          image_url: {
+            url: `data:${jobPostingFile.type};base64,${base64File}`
+          }
+        };
+      } else {
+        // PDF, DOCX 파일인 경우 - 텍스트 추출하여 프롬프트에 포함
+        try {
+          jobPostingText = await processResumeFile(jobPostingFile);
+        } catch (error) {
+          console.error('Job posting file processing error:', error);
+          return NextResponse.json(
+            { error: '채용공고 파일 처리 중 오류가 발생했습니다.' },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
+    // 시스템 프롬프트 생성 (텍스트 추출된 이력서 및 채용공고 포함)
+    const systemPrompt = buildSystemPrompt(position, experience, companyType, mainTasks, organizationalFocus, resumeText, jobPostingText);
 
     // 메시지 배열 구성
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
@@ -68,16 +100,33 @@ export async function POST(request: NextRequest) {
     ];
 
     // 이미지 파일이 있는 경우 메시지에 추가
-    if (resumeContent) {
+    if (resumeContent || jobPostingContent) {
+      const contentParts: any[] = [];
+      
+      if (resumeContent && jobPostingContent) {
+        contentParts.push({
+          type: 'text',
+          text: '첨부된 이미지들은 지원자의 이력서와 채용공고입니다. 이 내용을 분석하여 맞춤형 질문을 생성해주세요.'
+        });
+        contentParts.push(resumeContent);
+        contentParts.push(jobPostingContent);
+      } else if (resumeContent) {
+        contentParts.push({
+          type: 'text',
+          text: '첨부된 이미지는 지원자의 이력서입니다. 이 이력서 내용을 분석하여 개인 맞춤형 질문을 생성해주세요.'
+        });
+        contentParts.push(resumeContent);
+      } else if (jobPostingContent) {
+        contentParts.push({
+          type: 'text',
+          text: '첨부된 이미지는 채용공고입니다. 이 채용공고 내용을 분석하여 적절한 질문을 생성해주세요.'
+        });
+        contentParts.push(jobPostingContent);
+      }
+      
       messages.push({
         role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: '첨부된 이미지는 지원자의 이력서입니다. 이 이력서 내용을 분석하여 개인 맞춤형 질문을 생성해주세요.'
-          },
-          resumeContent
-        ]
+        content: contentParts
       });
     }
 

@@ -12,15 +12,19 @@ function readPromptsFromFile() {
     // 기본 프롬프트 반환
     return {
       basePrompts: {
-        withoutResume: "기본 시스템 프롬프트를 로드할 수 없습니다.",
-        withResume: "기본 시스템 프롬프트를 로드할 수 없습니다."
+        noResumeNoJobPosting: "기본 시스템 프롬프트를 로드할 수 없습니다.",
+        resumeNoJobPosting: "기본 시스템 프롬프트를 로드할 수 없습니다.",
+        noResumeJobPosting: "기본 시스템 프롬프트를 로드할 수 없습니다.",
+        resumeJobPosting: "기본 시스템 프롬프트를 로드할 수 없습니다."
       },
       positionPrompts: {},
       experiencePrompts: {},
       companyTypePrompts: {},
       outputFormats: {
-        withoutResume: "",
-        withResume: ""
+        noResumeNoJobPosting: "",
+        resumeNoJobPosting: "",
+        noResumeJobPosting: "",
+        resumeJobPosting: ""
       }
     };
   }
@@ -44,13 +48,26 @@ export function buildSystemPrompt(
   companyType: string,
   mainTasks: string,
   organizationalFocus: string,
-  resumeText: string
+  resumeText?: string,
+  jobPostingText?: string
 ): string {
   const hasResume = resumeText && resumeText.trim() !== '';
+  const hasJobPosting = jobPostingText && jobPostingText.trim() !== '';
   
-  // 이력서 유무에 따라 기본 프롬프트 선택
-  const basePrompt = hasResume ? BASE_PROMPTS.withResume : BASE_PROMPTS.withoutResume;
-  const outputFormat = hasResume ? OUTPUT_FORMATS.withResume : OUTPUT_FORMATS.withoutResume;
+  // 4가지 케이스에 따라 적절한 프롬프트 선택
+  let promptKey: string;
+  if (hasResume && hasJobPosting) {
+    promptKey = 'resumeJobPosting';
+  } else if (hasResume && !hasJobPosting) {
+    promptKey = 'resumeNoJobPosting';
+  } else if (!hasResume && hasJobPosting) {
+    promptKey = 'noResumeJobPosting';
+  } else {
+    promptKey = 'noResumeNoJobPosting';
+  }
+  
+  const basePrompt = BASE_PROMPTS[promptKey as keyof typeof BASE_PROMPTS] || '';
+  const outputFormat = OUTPUT_FORMATS[promptKey as keyof typeof OUTPUT_FORMATS] || '';
   
   const positionPrompt = POSITION_PROMPTS[position as keyof typeof POSITION_PROMPTS] || '';
   const experiencePrompt = EXPERIENCE_PROMPTS[experience as keyof typeof EXPERIENCE_PROMPTS] || '';
@@ -66,7 +83,12 @@ export function buildSystemPrompt(
 
   // 이력서가 있는 경우에만 이력서 내용 추가
   if (hasResume) {
-    finalPrompt = finalPrompt.replace('{{이력서}}', resumeText);
+    finalPrompt = finalPrompt.replace('{{이력서}}', resumeText || '');
+  }
+
+  // 채용공고가 있는 경우에만 채용공고 내용 추가
+  if (hasJobPosting) {
+    finalPrompt = finalPrompt.replace('{{채용공고}}', jobPostingText || '');
   }
 
   return `${finalPrompt}\n\n${outputFormat}`;

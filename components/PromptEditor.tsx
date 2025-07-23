@@ -5,15 +5,19 @@ import { POSITIONS, EXPERIENCES, COMPANY_TYPES } from '@/types';
 
 interface PromptData {
   basePrompts: {
-    withoutResume: string;
-    withResume: string;
+    noResumeNoJobPosting: string;
+    resumeNoJobPosting: string;
+    noResumeJobPosting: string;
+    resumeJobPosting: string;
   };
   positionPrompts: { [key: string]: string };
   experiencePrompts: { [key: string]: string };
   companyTypePrompts: { [key: string]: string };
   outputFormats: {
-    withoutResume: string;
-    withResume: string;
+    noResumeNoJobPosting: string;
+    resumeNoJobPosting: string;
+    noResumeJobPosting: string;
+    resumeJobPosting: string;
   };
 }
 
@@ -186,22 +190,42 @@ export default function PromptEditor() {
             <h2 className="text-lg font-semibold mb-4">기본 시스템 프롬프트</h2>
             
             <div>
-              <h3 className="text-md font-medium mb-2">이력서 없는 경우 (공통 질문만)</h3>
+              <h3 className="text-md font-medium mb-2">이력서 미업로드 + 채용공고 미업로드</h3>
               <textarea
-                value={prompts.basePrompts.withoutResume}
-                onChange={(e) => updatePrompt('base', 'withoutResume', e.target.value)}
+                value={prompts.basePrompts.noResumeNoJobPosting}
+                onChange={(e) => updatePrompt('base', 'noResumeNoJobPosting', e.target.value)}
                 className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm"
-                placeholder="이력서가 없을 때 사용되는 기본 프롬프트를 입력하세요..."
+                placeholder="이력서와 채용공고가 모두 없을 때 사용되는 기본 프롬프트를 입력하세요..."
               />
             </div>
 
             <div>
-              <h3 className="text-md font-medium mb-2">이력서 있는 경우 (공통 + 개별 질문)</h3>
+              <h3 className="text-md font-medium mb-2">이력서 업로드 + 채용공고 미업로드</h3>
               <textarea
-                value={prompts.basePrompts.withResume}
-                onChange={(e) => updatePrompt('base', 'withResume', e.target.value)}
+                value={prompts.basePrompts.resumeNoJobPosting}
+                onChange={(e) => updatePrompt('base', 'resumeNoJobPosting', e.target.value)}
                 className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm"
-                placeholder="이력서가 있을 때 사용되는 기본 프롬프트를 입력하세요..."
+                placeholder="이력서만 있을 때 사용되는 기본 프롬프트를 입력하세요..."
+              />
+            </div>
+
+            <div>
+              <h3 className="text-md font-medium mb-2">이력서 미업로드 + 채용공고 업로드</h3>
+              <textarea
+                value={prompts.basePrompts.noResumeJobPosting}
+                onChange={(e) => updatePrompt('base', 'noResumeJobPosting', e.target.value)}
+                className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm"
+                placeholder="채용공고만 있을 때 사용되는 기본 프롬프트를 입력하세요..."
+              />
+            </div>
+
+            <div>
+              <h3 className="text-md font-medium mb-2">이력서 업로드 + 채용공고 업로드</h3>
+              <textarea
+                value={prompts.basePrompts.resumeJobPosting}
+                onChange={(e) => updatePrompt('base', 'resumeJobPosting', e.target.value)}
+                className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm"
+                placeholder="이력서와 채용공고가 모두 있을 때 사용되는 기본 프롬프트를 입력하세요..."
               />
             </div>
           </div>
@@ -263,22 +287,42 @@ export default function PromptEditor() {
             <h2 className="text-lg font-semibold mb-4">출력 형식</h2>
             
             <div>
-              <h3 className="text-md font-medium mb-2">이력서 없는 경우 출력 형식</h3>
+              <h3 className="text-md font-medium mb-2">이력서 미업로드 + 채용공고 미업로드</h3>
               <textarea
-                value={prompts.outputFormats.withoutResume}
-                onChange={(e) => updatePrompt('output', 'withoutResume', e.target.value)}
+                value={prompts.outputFormats.noResumeNoJobPosting}
+                onChange={(e) => updatePrompt('output', 'noResumeNoJobPosting', e.target.value)}
                 className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm"
-                placeholder="이력서가 없을 때 사용되는 출력 형식을 입력하세요..."
+                placeholder="이력서와 채용공고가 모두 없을 때의 출력 형식을 입력하세요..."
               />
             </div>
 
             <div>
-              <h3 className="text-md font-medium mb-2">이력서 있는 경우 출력 형식</h3>
+              <h3 className="text-md font-medium mb-2">이력서 업로드 + 채용공고 미업로드</h3>
               <textarea
-                value={prompts.outputFormats.withResume}
-                onChange={(e) => updatePrompt('output', 'withResume', e.target.value)}
+                value={prompts.outputFormats.resumeNoJobPosting}
+                onChange={(e) => updatePrompt('output', 'resumeNoJobPosting', e.target.value)}
                 className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm"
-                placeholder="이력서가 있을 때 사용되는 출력 형식을 입력하세요..."
+                placeholder="이력서만 있을 때의 출력 형식을 입력하세요..."
+              />
+            </div>
+
+            <div>
+              <h3 className="text-md font-medium mb-2">이력서 미업로드 + 채용공고 업로드</h3>
+              <textarea
+                value={prompts.outputFormats.noResumeJobPosting}
+                onChange={(e) => updatePrompt('output', 'noResumeJobPosting', e.target.value)}
+                className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm"
+                placeholder="채용공고만 있을 때의 출력 형식을 입력하세요..."
+              />
+            </div>
+
+            <div>
+              <h3 className="text-md font-medium mb-2">이력서 업로드 + 채용공고 업로드</h3>
+              <textarea
+                value={prompts.outputFormats.resumeJobPosting}
+                onChange={(e) => updatePrompt('output', 'resumeJobPosting', e.target.value)}
+                className="w-full h-64 p-4 border border-gray-300 rounded-md font-mono text-sm"
+                placeholder="이력서와 채용공고가 모두 있을 때의 출력 형식을 입력하세요..."
               />
             </div>
           </div>
